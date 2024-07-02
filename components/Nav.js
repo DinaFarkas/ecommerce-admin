@@ -4,7 +4,7 @@ import { useRouter } from "next/router";
 export default function Nav()
 {
     const inactiveLink ='flex gap-1 p-1';
-    const activeLink ='flex gap-1 p-1 bg-white rounded-l-lg text-red-300 ';
+    const activeLink ='flex gap-1 p-1 bg-white rounded-l-lg text-tur1';
     const router= useRouter();
     const {pathname}=router;
 
