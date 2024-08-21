@@ -1,4 +1,4 @@
-import { Product } from "@/models/Products";
+import { Product } from "@/models/Product";
 import { mongooseConnect } from "@/lib/mongoose";
 
 export default async function handle(req,res){
@@ -27,7 +27,7 @@ export default async function handle(req,res){
     
     if(method === 'PUT'){
         const{title,description,price,images,_id}= req.body;
-        await Product.updateOne({_id}, {title, description, price,images});
+        await Product.updateOne({_id}, {title, description, price, images});
         res.json(true);
     }
 

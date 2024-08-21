@@ -1,89 +1,124 @@
+import multiparty from 'multiparty'; 
+import { v2 as cloudinary } from 'cloudinary'; 
+import { mongooseConnect } from "@/lib/mongoose"; 
+import { isAdminRequest } from "@/pages/api/auth/[...nextauth]";
 
-/** 
-import express from 'express';
-import { v2 as cloudinary } from 'cloudinary';
-import { mongooseConnect } from './path/to/mongooseConnect';
-import YourModel from './models/YourModel'; // Pretpostavimo da imate model definisan
-
+// Konfigurišem Cloudinary koristeći kredencijale iz okruženja (environment variables)
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const router = express.Router();
-
-router.post('/upload', async (req, res) => {
+export default async function handle(req, res) {
+  console.log("API funkcija je pokrenuta");
   try {
     await mongooseConnect();
 
-    // Pretpostavimo da je 'image' ime polja u formi
-    const result = await cloudinary.uploader.upload(req.files.image.path);
+    const form = new multiparty.Form();
+    console.log("Forma je kreirana");
 
-    // Kreirajte novi dokument sa URL-om slike
-    const newDocument = new YourModel({
-      // ... ostali podaci
-      imageUrl: result.secure_url
+    const { fields, files } = await new Promise((resolve, reject) => {
+      form.parse(req, (err, fields, files) => {
+        if (err) {
+          console.error("Greška pri parsiranju forme:", err);
+          reject(err);
+        } else {
+          resolve({ fields, files });
+        }
+      });
     });
 
-    // Sačuvajte dokument u MongoDB
-    await newDocument.save();
+    console.log("Forma je parsirana:", files);
 
-    res.status(200).json({ message: 'Slika je uspešno otpremljena i sačuvana u bazi.', imageUrl: result.secure_url });
+    if (!files.file0 || !Array.isArray(files.file0) || files.file0.length === 0) {
+      console.error("Nema fajlova u uploadu ili je struktura pogrešna.");
+      return res.status(400).json({ error: 'No files uploaded or incorrect file structure' });
+    }
+
+    const uploadPromises = files.file0.map(file =>
+      cloudinary.uploader.upload(file.path, {
+        resource_type: 'auto',
+        folder: 'nextproduct',  // Dodajemo folder u koji će se uploadovati slike
+      }).catch(error => {
+        console.error("Greška pri upload-u na Cloudinary:", error);
+        throw error;
+      })
+    );
+
+    const results = await Promise.all(uploadPromises);
+    const links = results.map(result => result.secure_url);
+    return res.json({ links });
   } catch (error) {
-    res.status(500).json({ message: 'Došlo je do greške prilikom otpremanja slike.', error: error.message });
+    console.error("Greška u API funkciji:", error);
+    return res.status(500).json({ error: error.message });
   }
-});
-
-export default router;
-
-
-
-import multiparty from 'multiparty';
-import {PutObjectCommand, S3Client} from '@aws-sdk/client-s3';
-import fs from 'fs';
-import mime from 'mime-types';
-import {mongooseConnect} from "@/lib/mongoose";
-import {isAdminRequest} from "@/pages/api/auth/[...nextauth]";
-const bucketName = 'dawid-next-ecommerce';
-
-export default async function handle(req,res) {
-  await mongooseConnect();
-  await isAdminRequest(req,res);
-
-  const form = new multiparty.Form();
-  const {fields,files} = await new Promise((resolve,reject) => {
-    form.parse(req, (err, fields, files) => {
-      if (err) reject(err);
-      resolve({fields,files});
-    });
-  });
-  console.log('length:', files.file.length);
-  const client = new S3Client({
-    region: 'us-east-1',
-    credentials: {
-      accessKeyId: process.env.S3_ACCESS_KEY,
-      secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
-    },
-  });
-  const links = [];
-  for (const file of files.file) {
-    const ext = file.originalFilename.split('.').pop();
-    const newFilename = Date.now() + '.' + ext;
-    await client.send(new PutObjectCommand({
-      Bucket: bucketName,
-      Key: newFilename,
-      Body: fs.readFileSync(file.path),
-      ACL: 'public-read',
-      ContentType: mime.lookup(file.path),
-    }));
-    const link = `https://${bucketName}.s3.amazonaws.com/${newFilename}`;
-    links.push(link);
-  }
-  return res.json({links});
 }
 
 export const config = {
-  api: {bodyParser: false},
+  api: { bodyParser: false }, 
+};
+
+
+/** 
+ * 
+ * BEZ ADMIN PROVERE IZNACI GRESKU :Greška koju dobijaš TypeError: Cannot read properties of undefined (reading 'map') sugeriše da pokušavaš da pozoveš map na nečemu što je undefined. U ovom slučaju, to je verovatno zbog files.file koji izgleda nije definisan.
+*
+*Da bi rešio ovaj problem, proveri da li files.file zaista sadrži podatke pre nego što pokušaš da koristiš map funkciju. Evo kako možeš izmeniti kod da se pobrine za to:
+
+import multiparty from 'multiparty'; 
+import { v2 as cloudinary } from 'cloudinary'; 
+import { mongooseConnect } from "@/lib/mongoose"; 
+import { isAdminRequest } from "@/pages/api/auth/[...nextauth]";
+
+// Konfigurišem Cloudinary koristeći kredencijale iz okruženja (environment variables)
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME, // Naziv Cloudinary naloga
+  api_key: process.env.CLOUDINARY_API_KEY, // API ključ za pristup Cloudinary
+  api_secret: process.env.CLOUDINARY_API_SECRET, // API za pristup Cloudinary
+});
+
+export default async function handle(req, res) {
+  console.log("API funkcija je pokrenuta");
+  try {
+    await mongooseConnect();
+
+    const form = new multiparty.Form();
+    console.log("Forma je kreirana");
+    
+    const { fields, files } = await new Promise((resolve, reject) => {
+      form.parse(req, (err, fields, files) => {
+        if (err) {
+          console.error("Greška pri parsiranju forme:", err);
+          reject(err);
+        } else {
+          resolve({ fields, files });
+        }
+      });
+    });
+
+    console.log("Forma je parsirana:", files);
+
+    const uploadPromises = files.file.map(file =>
+      cloudinary.uploader.upload(file.path, {
+        resource_type: 'auto',
+      }).catch(error => {
+        console.error("Greška pri upload-u na Cloudinary:", error);
+        throw error;
+      })
+    );
+
+    const results = await Promise.all(uploadPromises);
+    const links = results.map(result => result.secure_url);
+    return res.json({ links });
+  } catch (error) {
+    console.error("Greška u API funkciji:", error);
+    return res.status(500).json({ error: error.message });
+  }
+}
+
+
+export const config = {
+  api: { bodyParser: false }, 
 };
  */

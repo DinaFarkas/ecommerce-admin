@@ -1,9 +1,9 @@
 import axios from "axios";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import Link from "next/link";
 import Spinner from "./Spinner";
-import { ReactSortable } from "react-sortablejs";
+import { ReactSortable } from "react-sortablejs"; 
+
 
 export default function ProductForm({
     _id,
@@ -43,19 +43,41 @@ export default function ProductForm({
         router.push('/products');
     }
 
-    async function uploadImages(ev) {
-        const files = ev.target?.files;
-        if (files?.length > 0) {
 
-          setIsUploading(true);
-          const data = new FormData();
-          for (const file of files) {
-            data.append('file', file);
+    async function uploadImages(ev) {
+      const files = ev.target?.files;
+      if (files?.length > 0) { 
+        setIsUploading(true); 
+    
+        const data = new FormData(); 
+    
+        for (let i = 0; i < files.length; i++) {
+          data.append(`file${i}`, files[i]);
+        }
+    
+        // Dodajemo Cloudinary upload preset
+        data.append("upload_preset", "nextproduct");
+    
+        try {
+          const res = await axios.post('/api/upload', data, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+          });
+          console.log(res.data);
+        } catch (error) {
+          console.error("Error uploading images:", error);
+          if (error.response) {
+            console.error("Server responded with an error:", error.response.status, error.response.data);
+          } else if (error.request) {
+            console.error("No response received:", error.request);
+          } else {
+            console.error("Error setting up the request:", error.message);
           }
+        } finally {
           setIsUploading(false);
         }
       }
-
+    }
+  
       function updateImagesOrder(images){
         setImages(images);
       }

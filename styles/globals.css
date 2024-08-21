@@ -2,11 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
-input,textarea{
+input,textarea, select{
     @apply border border-orc1 rounded-md px-1 w-full mb-2 text-black;
 }
 
-input:focus, textarea:focus{
+input:focus, textarea:focus, select:focus{
     @apply border-lil;  /* ne radi proveri posle*/
 }
 
@@ -20,7 +20,7 @@ label{
 }
 
 .btn-primary{
-    @apply bg-blugre rounded-lg text-white px-4 py-1 mt-2;
+    @apply bg-blugre rounded-lg text-white px-4 py-1;
 }
 
 .btn-primary:hover{
@@ -45,16 +45,23 @@ label{
 
 }
 
+.swal2-confirm{
+    @apply bg-orc1;
+}
+
+.swal2-cancel{
+    @apply  bg-blugre1;
+}
+
 .btn-purple, .btn-default{
     @apply rounded-lg text-white px-4 py-1;
 }
-
 
 .btn-purple{
     @apply  bg-orc1;
 }
 
-.btn-purple:hover{
+.btn-purple:hover , .swal2-confirm:hover{
     @apply bg-lil1;
 }
 
@@ -62,6 +69,7 @@ label{
     @apply  bg-blugre1;
 }
 
-.btn-default:hover{
+.btn-default:hover, .swal2-cancel:hover{
     @apply bg-tur1;
 }
+
