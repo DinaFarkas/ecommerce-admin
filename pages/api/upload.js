@@ -48,6 +48,7 @@ export default async function handle(req, res) {
 
     const results = await Promise.all(uploadPromises);
     const links = results.map(result => result.secure_url);
+    console.log("Linkovi za upis u bazu:", links);  // - Dodato logovanje linkova za upis
     return res.json({ links });
   } catch (error) {
     console.error("Greška u API funkciji:", error);
