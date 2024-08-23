@@ -146,7 +146,7 @@ function Categories({swal}){
                 <div className="flex gap-1">
                     <button className="btn-primary" type="submit">Save</button>
                     {editedCategory && (
-                        <button type="button"  className="btn-default" onClick={() => {
+                        <button type="button"  className="btn-cancel" onClick={() => {
                             setEditedCategory(null);
                             setName('');
                             setParentCategory('');
@@ -175,8 +175,8 @@ function Categories({swal}){
                                 <td>{category?.parent?.name}</td>
                                 <td>
                                     <div className="flex">
-                                    <button onClick={() => editCategory(category)} className="btn-primary mr-2" >Edit</button>
-                                    <button onClick={() => deleteCategory(category)} className="btn-primary">Delete</button>
+                                    <button onClick={() => editCategory(category)} className="btn-primary mr-1" >Edit</button>
+                                    <button onClick={() => deleteCategory(category)} className="btn-purple">Delete</button>
                                     </div>
                                 </td>
                             </tr>

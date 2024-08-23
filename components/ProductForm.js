@@ -179,11 +179,11 @@ export default function ProductForm({
             <label>Description</label>
             <textarea placeholder="description" value={description} onChange={(ev) => setDescription(ev.target.value)} />
 
-            <label>Price</label>
+            <label>Price(Euro)</label>
             <input type="number" placeholder="price" value={price} onChange={(ev) => setPrice(ev.target.value)} />
 
             <button type="submit" className="btn-primary float-right">
-                Save
+            Save
             </button>
         </form>
     );

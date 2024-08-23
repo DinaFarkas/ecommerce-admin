@@ -14,6 +14,7 @@ export default async function handle(req, res) {
   console.log("API funkcija je pokrenuta");
   try {
     await mongooseConnect();
+    await isAdminRequest(req,res); //DODATA LINIJA ZA PROVERU ADMINA
 
     const form = new multiparty.Form();
     console.log("Forma je kreirana");

@@ -2,6 +2,6 @@ import { BeatLoader } from "react-spinners";
 
 export default function Spinner() {
     return(
-        <BeatLoader color="orc1" speedMultiplier={2}/>
+        <BeatLoader color="#AA47A3" speedMultiplier={1}/>
     )
 }
