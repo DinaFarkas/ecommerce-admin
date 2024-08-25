@@ -90,6 +90,8 @@ export default function ProductForm({
         }
       }
     }
+
+    
   
       function updateImagesOrder(images){
         setImages(images);
