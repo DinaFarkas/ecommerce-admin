@@ -2,6 +2,7 @@ import multiparty from 'multiparty';
 import { v2 as cloudinary } from 'cloudinary'; 
 import { mongooseConnect } from "@/lib/mongoose"; 
 import { isAdminRequest } from "@/pages/api/auth/[...nextauth]";
+import { Product } from "@/models/Product";
 
 // Konfigurišem Cloudinary koristeći kredencijale iz okruženja (environment variables)
 cloudinary.config({
@@ -50,7 +51,13 @@ export default async function handle(req, res) {
     const results = await Promise.all(uploadPromises);
     const links = results.map(result => result.secure_url);
     console.log("Linkovi za upis u bazu:", links);  // - Dodato logovanje linkova za upis
-    return res.json({ links });
+    // Citanje product-a iz baze
+    console.log(fields.product_id[0]); //[0]
+    var product = await Product.findOne({_id:fields.product_id})//[0]
+    product.images = links;
+    // Cuvanje nove vrednosti producta u bazu
+    product = await Product.updateOne(product);
+    return res.json({ product });
   } catch (error) {
     console.error("Greška u API funkciji:", error);
     return res.status(500).json({ error: error.message });
@@ -61,66 +68,19 @@ export const config = {
   api: { bodyParser: false }, 
 };
 
+/*  // Citanje product-a iz baze
+    const productId = fields.product_id[0]; // Provera product_id
+    let product = await Product.findById(productId);
 
-/** 
- * 
- * BEZ ADMIN PROVERE IZNACI GRESKU :Greška koju dobijaš TypeError: Cannot read properties of undefined (reading 'map') sugeriše da pokušavaš da pozoveš map na nečemu što je undefined. U ovom slučaju, to je verovatno zbog files.file koji izgleda nije definisan.
-*
-*Da bi rešio ovaj problem, proveri da li files.file zaista sadrži podatke pre nego što pokušaš da koristiš map funkciju. Evo kako možeš izmeniti kod da se pobrine za to:
+    if (!product) {
+      return res.status(404).json({ error: "Product not found" });
+    }
 
-import multiparty from 'multiparty'; 
-import { v2 as cloudinary } from 'cloudinary'; 
-import { mongooseConnect } from "@/lib/mongoose"; 
-import { isAdminRequest } from "@/pages/api/auth/[...nextauth]";
-
-// Konfigurišem Cloudinary koristeći kredencijale iz okruženja (environment variables)
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME, // Naziv Cloudinary naloga
-  api_key: process.env.CLOUDINARY_API_KEY, // API ključ za pristup Cloudinary
-  api_secret: process.env.CLOUDINARY_API_SECRET, // API za pristup Cloudinary
-});
-
-export default async function handle(req, res) {
-  console.log("API funkcija je pokrenuta");
-  try {
-    await mongooseConnect();
-
-    const form = new multiparty.Form();
-    console.log("Forma je kreirana");
-    
-    const { fields, files } = await new Promise((resolve, reject) => {
-      form.parse(req, (err, fields, files) => {
-        if (err) {
-          console.error("Greška pri parsiranju forme:", err);
-          reject(err);
-        } else {
-          resolve({ fields, files });
-        }
-      });
-    });
-
-    console.log("Forma je parsirana:", files);
-
-    const uploadPromises = files.file.map(file =>
-      cloudinary.uploader.upload(file.path, {
-        resource_type: 'auto',
-      }).catch(error => {
-        console.error("Greška pri upload-u na Cloudinary:", error);
-        throw error;
-      })
-    );
-
-    const results = await Promise.all(uploadPromises);
-    const links = results.map(result => result.secure_url);
-    return res.json({ links });
-  } catch (error) {
-    console.error("Greška u API funkciji:", error);
-    return res.status(500).json({ error: error.message });
-  }
-}
+    // Ažuriranje slika u bazi
+    product.images = [...product.images, ...links]; // Dodavanje novih slika uz postojeće
+    await product.save(); // Snimanje u bazu */
 
 
-export const config = {
-  api: { bodyParser: false }, 
-};
- */
+
+
+

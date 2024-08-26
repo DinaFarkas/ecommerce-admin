@@ -70,7 +70,7 @@ export default function ProductForm({
     
         // Dodajemo Cloudinary upload preset
         data.append("upload_preset", "nextproduct");
-    
+        data.append("product_id",_id);  //dodato
         try {
           const res = await axios.post('/api/upload', data, {
             headers: { 'Content-Type': 'multipart/form-data' },
@@ -150,7 +150,7 @@ export default function ProductForm({
             <div className="mb-2 flex flex-wrap gap-1">
                
                 <ReactSortable list={images} className="flex flex-wrap gap-1" setList={updateImagesOrder}>
-                {!!images?.length && images.map(Link => (
+                {!!images?.length && images.map(link => (
 
                     <div key={link} className="h-24">                        
                         <img src={link} alt="" className="rounded-lg"/>
@@ -189,3 +189,12 @@ export default function ProductForm({
     );
 };
 
+/*<ReactSortable list={images} className="flex flex-wrap gap-1" setList={updateImagesOrder}>
+                {!!images?.length && images.map(link => (
+
+                    <div key={link} className="h-24">                        
+                        <img src={link} alt="" className="rounded-lg"/>
+                    </div>
+
+                ))}
+                </ReactSortable> */
