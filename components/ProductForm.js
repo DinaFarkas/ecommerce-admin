@@ -124,10 +124,8 @@ export default function ProductForm({
             <label>Category</label>
             <select value={category} onChange={ev => setCategory(ev.target.value)}>
                 <option value="">Uncategorized</option>
-                {categories.length > 0 && categories.map(c => (
-                  //PROVERI JEL OVO RADI
-                  // eslint-disable-next-line react/jsx-key    
-                  <option value={c._id}>{c.name}</option>
+                {categories.length > 0 && categories.map(c => (  
+                  <option key={c._id} value={c._id}>{c.name}</option> //dodat kljuc na mestu gde je izbacivalo gresku 
                 ))}
             </select>
             
